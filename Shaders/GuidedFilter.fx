@@ -34,48 +34,171 @@ uniform float fSigma <
     ui_step = 0.1;
 > = 8.0;
 
-texture2D buffer0Tex <pooled = true;>
+// May the lord have mercy on my soul
+texture2D intermediateMeanITex
 {
     Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
     Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
     Format = RGBA8;
 };
 
-sampler2D buffer0Sampler
+sampler2D intermediateMeanISampler
 {
-    Texture = buffer0Tex;
+    Texture = intermediateMeanITex;
     MagFilter = LINEAR;
     MinFilter = LINEAR;
     MipFilter = LINEAR;
 };
 
-texture2D buffer1Tex <pooled = true;>
+texture2D finalMeanITex
 {
     Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
     Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
     Format = RGBA8;
 };
 
-sampler2D buffer1Sampler
+sampler2D finalMeanISampler
 {
-    Texture = buffer1Tex;
+    Texture = intermediateMeanITex;
     MagFilter = LINEAR;
     MinFilter = LINEAR;
     MipFilter = LINEAR;
 };
 
-// we can reuse the same 2 buffers for these variables
-#define MEAN_I_SAMPLER buffer0Sampler
-#define MEAN_P_SAMPLER buffer0Sampler
-#define CORR_I_SAMPLER buffer1Sampler
-#define MEAN_A_SAMPLER buffer1Sampler
-#define MEAN_B_SAMPLER buffer0Sampler
+texture2D intermediateCorrITex
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
 
-#define MEAN_I_TEX buffer0Tex
-#define MEAN_P_TEX buffer0Tex
-#define CORR_I_TEX buffer1Tex
-#define MEAN_A_TEX buffer1Tex
-#define MEAN_B_TEX buffer0Tex
+sampler2D intermediateCorrISampler
+{
+    Texture = intermediateCorrITex;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D intermediateCorrITex2
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D intermediateCorrISampler2
+{
+    Texture = intermediateCorrITex2;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D finalCorrITex
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D finalCorrISampler
+{
+    Texture = intermediateCorrITex2;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D baseATex
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D baseASampler
+{
+    Texture = baseATex;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D intermediateMeanATex
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D intermediateMeanASampler
+{
+    Texture = intermediateMeanATex;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D finalMeanATex
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D finalMeanASampler
+{
+    Texture = finalMeanATex;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D intermediateMeanBTex
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D intermediateMeanBSampler
+{
+    Texture = intermediateMeanBTex;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D intermediateMeanBTex2
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D intermediateMeanBSampler2
+{
+    Texture = intermediateMeanBTex2;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
+
+texture2D finalMeanBTex
+{
+    Width = BUFFER_WIDTH * SAMPLING_MULTIPLIER;
+    Height = BUFFER_HEIGHT * SAMPLING_MULTIPLIER;
+    Format = RGBA8;
+};
+
+sampler2D finalMeanBSampler
+{
+    Texture = finalMeanBTex;
+    MagFilter = LINEAR;
+    MinFilter = LINEAR;
+    MipFilter = LINEAR;
+};
 
 float normpdf(float x, float sigma)
 {
@@ -130,27 +253,45 @@ namespace Wrappers
     }
 
     [shader("pixel")]
-    float4 buffer0_gaussianVerticalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
+    float4 intermediateMeanISampler_gaussianHorizontalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
     {
-        return gaussianVerticalPass(buffer0Sampler, tex);
+        return gaussianHorizontalPass(intermediateMeanISampler, tex);
     }
 
     [shader("pixel")]
-    float4 buffer0_gaussianHorizontalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
+    float4 intermediateCorrISampler_gaussianVerticalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
     {
-        return gaussianHorizontalPass(buffer0Sampler, tex);
+        return gaussianVerticalPass(intermediateCorrISampler, tex);
     }
 
     [shader("pixel")]
-    float4 buffer1_gaussianHorizontalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
+    float4 intermediateCorrISampler2_gaussianHorizontalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
     {
-        return gaussianHorizontalPass(buffer1Sampler, tex);
+        return gaussianHorizontalPass(intermediateCorrISampler2, tex);
     }
 
     [shader("pixel")]
-    float4 buffer1_gaussianVerticalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
+    float4 baseASampler_gaussianVerticalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
     {
-        return gaussianVerticalPass(buffer1Sampler, tex);
+        return gaussianVerticalPass(baseASampler, tex);
+    }
+
+    [shader("pixel")]
+    float4 intermediateMeanASampler_gaussianHorizontalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
+    {
+        return gaussianHorizontalPass(intermediateMeanASampler, tex);
+    }
+
+    [shader("pixel")]
+    float4 intermediateMeanBSampler_gaussianVerticalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
+    {
+        return gaussianVerticalPass(intermediateMeanBSampler, tex);
+    }
+
+    [shader("pixel")]
+    float4 intermediateMeanBSampler2_gaussianHorizontalBlur(float4 position : SV_POSITION, float2 tex : TEXCOORD) : SV_TARGET
+    {
+        return gaussianHorizontalPass(intermediateMeanBSampler2, tex);
     }
 }
 
@@ -172,9 +313,9 @@ float4 squareI(float4 position : SV_Position, float2 tex : TEXCOORD) : SV_Target
 [shader("pixel")]
 float4 aConstruct(float4 position : SV_Position, float2 tex : TEXCOORD) : SV_Target
 {
-    float4 mean_i = tex2D(MEAN_I_SAMPLER, tex);
+    float4 mean_i = tex2D(finalMeanISampler, tex);
     float4 mean_p = mean_i;
-    float4 corr_i = tex2D(CORR_I_SAMPLER, tex);
+    float4 corr_i = tex2D(finalCorrISampler, tex);
     float4 corr_ip = corr_i;
     
     float4 var_i = corr_i - mean_i * mean_i;
@@ -187,10 +328,10 @@ float4 aConstruct(float4 position : SV_Position, float2 tex : TEXCOORD) : SV_Tar
 [shader("pixel")]
 float4 bConstruct(float4 position : SV_Position, float2 tex : TEXCOORD) : SV_Target
 {
-    float4 mean_i = tex2D(MEAN_I_SAMPLER, tex);
+    float4 mean_i = tex2D(finalMeanISampler, tex);
     float4 mean_p = mean_i;
 
-    float4 a = tex2D(MEAN_A_SAMPLER, tex);
+    float4 a = tex2D(baseASampler, tex);
     
     // b
     return mean_p - a * mean_i;
@@ -199,8 +340,8 @@ float4 bConstruct(float4 position : SV_Position, float2 tex : TEXCOORD) : SV_Tar
 [shader("pixel")]
 float4 mainImage(float4 position : SV_Position, float2 tex : TEXCOORD) : SV_Target
 {
-    float4 mean_a = tex2D(MEAN_A_SAMPLER, tex);
-    float4 mean_b = tex2D(MEAN_B_SAMPLER, tex);
+    float4 mean_a = tex2D(finalMeanASampler, tex);
+    float4 mean_b = tex2D(finalMeanBSampler, tex);
 
     // q = mean_a * I + mean_b
     return mean_a * tex2D(BACKBUFFER, tex) + mean_b;
@@ -213,13 +354,13 @@ technique GuidedBlur
     {
         VertexShader = PostProcessVS;
         PixelShader = Wrappers::BackBuffer_gaussianVerticalBlur;
-        RenderTarget = MEAN_I_TEX;
+        RenderTarget = intermediateMeanITex;
     }
     pass IHorizontalBlur
     {
         VertexShader = PostProcessVS;
-        PixelShader = Wrappers::buffer0_gaussianHorizontalBlur;
-        RenderTarget = MEAN_I_TEX;
+        PixelShader = Wrappers::intermediateMeanISampler_gaussianHorizontalBlur;
+        RenderTarget = finalMeanITex;
     }
 
     // construct corrI
@@ -228,62 +369,59 @@ technique GuidedBlur
     {
         VertexShader = PostProcessVS;
         PixelShader = squareI;
-        RenderTarget = CORR_I_TEX;
+        RenderTarget = intermediateCorrITex;
     }
     pass corrIVerticalBlur
     {
         VertexShader = PostProcessVS;
-        PixelShader = Wrappers::buffer1_gaussianVerticalBlur;
-        RenderTarget = CORR_I_TEX;
+        PixelShader = Wrappers::intermediateCorrISampler_gaussianVerticalBlur;
+        RenderTarget = intermediateCorrITex2;
     }
     pass corrIHorizontalBlur
     {
         VertexShader = PostProcessVS;
-        PixelShader = Wrappers::buffer1_gaussianHorizontalBlur;
-        RenderTarget = CORR_I_TEX;
+        PixelShader = Wrappers::intermediateCorrISampler2_gaussianHorizontalBlur;
+        RenderTarget = finalCorrITex;
     }
 
-    // construct a and b, these will overwrite buffers 1 and 0 respectively
-    //
-    // b relies on the contents of meanI and meanp however, which means we must preserve buffer 0 
-    // until b is constructed, and then overwrite that buffer with b
+    // construct a
     pass aConstruct
     {
         VertexShader = PostProcessVS;
         PixelShader = aConstruct;
-        RenderTarget = MEAN_A_TEX;
+        RenderTarget = baseATex;
     }
-    pass bConstruct
-    {
-        VertexShader = PostProcessVS;
-        PixelShader = bConstruct;
-        RenderTarget = MEAN_B_TEX;
-    }
-
-    // blur a and b
     pass aVerticalBlur
     {
         VertexShader = PostProcessVS;
-        PixelShader = Wrappers::buffer1_gaussianVerticalBlur;
-        RenderTarget = MEAN_A_TEX;
+        PixelShader = Wrappers::baseASampler_gaussianVerticalBlur;
+        RenderTarget = intermediateMeanATex;
     }
     pass aHorizontalBlur
     {
         VertexShader = PostProcessVS;
-        PixelShader = Wrappers::buffer1_gaussianHorizontalBlur;
-        RenderTarget = MEAN_A_TEX;
+        PixelShader = Wrappers::intermediateMeanASampler_gaussianHorizontalBlur;
+        RenderTarget = finalMeanATex;
+    }
+
+    // construct b
+    pass bConstruct
+    {
+        VertexShader = PostProcessVS;
+        PixelShader = bConstruct;
+        RenderTarget = intermediateMeanBTex;
     }
     pass bVerticalBlur
     {
         VertexShader = PostProcessVS;
-        PixelShader = Wrappers::buffer0_gaussianVerticalBlur;
-        RenderTarget = MEAN_B_TEX;
+        PixelShader = Wrappers::intermediateMeanBSampler_gaussianVerticalBlur;
+        RenderTarget = intermediateMeanBTex2;
     }
     pass bHorizontalBlur
     {
         VertexShader = PostProcessVS;
-        PixelShader = Wrappers::buffer0_gaussianHorizontalBlur;
-        RenderTarget = MEAN_B_TEX;
+        PixelShader = Wrappers::intermediateMeanBSampler2_gaussianHorizontalBlur;
+        RenderTarget = finalMeanBTex;
     }
 
     // final output!
